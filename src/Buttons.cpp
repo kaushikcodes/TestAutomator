@@ -41,6 +41,12 @@ void ButtonDClicked(Button2 &button)
     Controller_IncreaseSpeed();
 }
 
+void ResetMode(Button2 &button)
+{
+    Serial.print("Button D was long pressed!     ");
+    Controller_Reset();
+}
+
 void Buttons_Init(void)
 {
 
@@ -53,4 +59,7 @@ void Buttons_Init(void)
    btnB.setClickHandler(ButtonBClicked);
    btnC.setClickHandler(ButtonCClicked);
    btnD.setClickHandler(ButtonDClicked);
+   btnD.setLongClickTime(1500);
+   btnD.setLongClickHandler(ResetMode);
 }
+//LONG PRESS BUTTON D FOR 1.5 SECONDS TO RESET COUNTER FOR NO OF CYCLES
