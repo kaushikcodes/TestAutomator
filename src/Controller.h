@@ -25,3 +25,6 @@ void Controller_IncreaseThreshold();
 void Controller_DecreaseThreshold();
 int Controller_GetThreshold();
 int Controller_GetTime();
+int Controller_GetSetting();
+void Controller_Reset();
+
