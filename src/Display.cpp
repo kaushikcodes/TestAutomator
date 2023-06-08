@@ -6,6 +6,7 @@
 
 ThinkInk_290_Grayscale4_T5 display(EPD_DC, EPD_RESET, EPD_CS, -1);
 int speedy = Controller_GetTime();
+int setting = Controller_GetSetting();
 int thresholdy = Controller_GetThreshold();
 ThinkInk_290_Grayscale4_T5* Display_GetPtr(void)
 {
@@ -47,7 +48,7 @@ void Display_Init(void)
    display.print(thresholdy);
    display.setCursor(210, 90);
    display.setTextSize(2);
-   display.print((((speedy - 1000) / 350) * 2));
+   display.print(setting);
    display.setCursor(180, 120);
    display.setTextSize(1.8);
    display.printf("- Setting +");
@@ -62,9 +63,10 @@ void Display_Run(void)
     if(speedy2 != speedy)
     {
         speedy = speedy2;
+        setting = Controller_GetSetting();
         display.setCursor(205, 90);
         display.setTextSize(2);
-        display.print((((speedy - 1000) / 350) * 2));
+        display.print(setting);
         display.print(" ");
         display.display();
     }
