@@ -10,3 +10,7 @@ First, I designed the display (as seen below) with the help of the ThinkInk libr
 With the help of this setup, once a user chooses a particular number of cycles and setting, the microcontroller sends this information over to the stepper motor 
 driver, which outputs the appropriate amount of voltage to drive either a linear actuator or a DC motor (actuator in our case). This actuator has a circular mount 
 on the other end which pushes and pulls the lever of the mixer as it extends and retracts respectively. 
+
+After multiple modifications due to customer expectations, this was our initial testing setup: 
+
+![MixerTest](https://github.com/kaushikcodes/TestAutomator/assets/66272646/93b68d08-07d1-4393-842e-dbafe13dca50)
