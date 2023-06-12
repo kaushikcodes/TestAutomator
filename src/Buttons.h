@@ -8,5 +8,5 @@ void ButtonBClicked(Button2 &button);
 void ButtonCClicked(Button2 &button);
 void ButtonDlicked(Button2 &button);
 void Buttons_Init(void);
-
+void ResetMode(Button2 &button);
 #endif
