@@ -20,13 +20,15 @@ void Buttons_Run(void)
 void ButtonAClicked(Button2 &button)
 {
     Serial.print("Button A was clicked!     ");
-    Controller_DecreaseThreshold();
+    //Controller_DecreaseThreshold();
+    Controller_DecreaseHoldTimeAtSpeed();
 }
 
 void ButtonBClicked(Button2 &button)
 {
     Serial.print("Button B was clicked!      ");
-    Controller_IncreaseThreshold();
+    //Controller_IncreaseThreshold();
+    Controller_IncreaseHoldTimeAtSpeed();
 }
 
 void ButtonCClicked(Button2 &button)
@@ -63,3 +65,4 @@ void Buttons_Init(void)
    btnD.setLongClickHandler(ResetMode);
 }
 //LONG PRESS BUTTON D FOR 1.5 SECONDS TO RESET COUNTER FOR NO OF CYCLES
+
