@@ -47,10 +47,14 @@ void Controller_Init(tiny_timer_group_t *timerGroup)
 //EXTENDS ALL THE WAY IN THE START
     digitalWrite(pin1, LOW);
     digitalWrite(pin2, HIGH);
-    delay(15000);
-
+    tiny_timer_start(
+        instance._private.timerGroup,
+        &instance._private.controllerTimer,
+        15000,
+        NULL,
+        Controller_Extend
+    );
     Serial.print("Initializing");
-    Controller_Extend(NULL);
 }
 
 
