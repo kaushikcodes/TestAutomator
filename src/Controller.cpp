@@ -53,7 +53,7 @@ void Controller_Init(tiny_timer_group_t *timerGroup)
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
-        8000,
+        15000,
         NULL,
         Controller_Extend
     );
