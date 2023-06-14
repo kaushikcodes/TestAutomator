@@ -20,7 +20,7 @@ enum {
 };
 
 //ON
-int holdAtSpeed[] = {3000, 8000, 5000}; //change these values for the time it should hold at a particular speed for
+int holdAtSpeed[] = {3000, 8000, 5000}; //change these values for the time it should hold at a particular speed for (right now in ms)
 enum {
     time_2_holdspeed,
     time_4_holdspeed,
@@ -29,8 +29,8 @@ enum {
 
 
 //OFF
-int holdAtZero[] = {4800, 12000, 500}; //change these values for the time it should hold at a ZERO for
-enum {
+int holdAtZero[] = {4800, 12000, 500}; //change these values for the time it should hold at a ZERO for (right now in ms)
+enum { 
     time_2_holdzero,
     time_4_holdzero,
     time_10_holdzero
@@ -53,7 +53,7 @@ void Controller_Init(tiny_timer_group_t *timerGroup)
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
-        15000,
+        15000, //this is to fully extend the actuator at the start
         NULL,
         Controller_Extend
     );
@@ -102,7 +102,7 @@ void Controller_Retract(void *context)
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
-        speedDelays[currSpeed] + 50,
+        speedDelays[currSpeed] + 50, //this was because more force was required for retracting than extending, might not need!!!
         NULL,
         Controller_HoldAtEnd
     );
