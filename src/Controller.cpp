@@ -11,21 +11,25 @@ uint16_t count = 0;
 
 Controller_t instance;
 uint8_t currSpeed;
-uint16_t speedDelays[] = {3500, 5000, 9750}; //Change these values for each speed and see which one fits best
+
+uint16_t speedDelays[] = {3500, 5500, 12650}; //Change these values for each speed and see which one fits best
 enum {
     speed_2,
     speed_4,
     speed_10
 };
 
-int holdAtSpeed[] = {300000, 8000, 5000}; //change these values for the time it should hold at a particular speed for
+//ON
+int holdAtSpeed[] = {3000, 8000, 5000}; //change these values for the time it should hold at a particular speed for
 enum {
     time_2_holdspeed,
     time_4_holdspeed,
     time_10_holdspeed
 };
 
-int holdAtZero[] = {480000, 12000, 500}; //change these values for the time it should hold at a ZERO for
+
+//OFF
+int holdAtZero[] = {4800, 12000, 500}; //change these values for the time it should hold at a ZERO for
 enum {
     time_2_holdzero,
     time_4_holdzero,
@@ -49,7 +53,7 @@ void Controller_Init(tiny_timer_group_t *timerGroup)
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
-        20000,
+        8000,
         NULL,
         Controller_Extend
     );
@@ -98,7 +102,7 @@ void Controller_Retract(void *context)
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
-        speedDelays[currSpeed],
+        speedDelays[currSpeed] + 50,
         NULL,
         Controller_HoldAtEnd
     );
@@ -194,4 +198,3 @@ void Controller_DecreaseHoldTimeAtSpeed()
 {
     holdAtSpeed[currSpeed] = holdAtSpeed[currSpeed] - 1000;
 }
-
