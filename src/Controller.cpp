@@ -3,8 +3,8 @@
 #include "Parameters.h"
 //75 mm extended fully, 5mm/s.
 //Hence, 15s to extend
-const int pin1 = 34;
-const int pin2 = 33;
+const int pin1 = 18;
+const int pin2 = 17;
 
 uint16_t count = 0;
 //int threshold = 300000; //CHANGE THIS VALUE TO CHANGE DEFAULT NUMBER OF CYCLES
@@ -20,7 +20,7 @@ enum {
 };
 
 //ON
-int holdAtSpeed[] = {3000, 8000, 5000}; //change these values for the time it should hold at a particular speed for (right now in ms)
+int holdAtSpeed[] = {3000, 8000, 5000}; //change these values for the time it should hold at a particular speed for
 enum {
     time_2_holdspeed,
     time_4_holdspeed,
@@ -29,8 +29,8 @@ enum {
 
 
 //OFF
-int holdAtZero[] = {4800, 12000, 500}; //change these values for the time it should hold at a ZERO for (right now in ms)
-enum { 
+int holdAtZero[] = {4800, 12000, 500}; //change these values for the time it should hold at a ZERO for
+enum {
     time_2_holdzero,
     time_4_holdzero,
     time_10_holdzero
@@ -53,7 +53,7 @@ void Controller_Init(tiny_timer_group_t *timerGroup)
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
-        15000, //this is to fully extend the actuator at the start
+        15000,
         NULL,
         Controller_Extend
     );
@@ -102,7 +102,7 @@ void Controller_Retract(void *context)
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
-        speedDelays[currSpeed] + 50, //this was because more force was required for retracting than extending, might not need!!!
+        speedDelays[currSpeed] + 50,
         NULL,
         Controller_HoldAtEnd
     );
@@ -131,19 +131,6 @@ void Controller_HoldAtEnd(void *context)
     );
 }
 
-/*
-
-void Controller_IncreaseThreshold()
-{
-    threshold = threshold + 100;
-}
-
-void Controller_DecreaseThreshold()
-{
-    threshold = threshold - 100;
-}
-
-*/
 void Controller_IncreaseSpeed()
 {
     if(currSpeed < 2)
@@ -181,20 +168,4 @@ int Controller_GetSetting()
 int Controller_GetCount()
 {
     return count;
-}
-
-int Controller_GetHoldAtSpeedTime()
-{
-    return holdAtSpeed[currSpeed];
-}
-
-void Controller_IncreaseHoldTimeAtSpeed()
-{
-    holdAtSpeed[currSpeed] = holdAtSpeed[currSpeed] + 1000;
-
-}
-
-void Controller_DecreaseHoldTimeAtSpeed()
-{
-    holdAtSpeed[currSpeed] = holdAtSpeed[currSpeed] - 1000;
 }
