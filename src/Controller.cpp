@@ -66,7 +66,7 @@ void Controller_Extend(void *context)
     if(count == 0)
     {             
         count += 1;
-        Controller_Hold();
+        Controller_Hold;
     }
    
     digitalWrite(pin1, LOW);
