@@ -60,9 +60,14 @@ void Controller_Init(tiny_timer_group_t *timerGroup)
     Serial.print("Initializing");
 }
 
-
 void Controller_Extend(void *context)
 {
+    if(count == 0)
+    {             
+        count += 1;
+        Controller_Hold();
+    }
+   
     digitalWrite(pin1, LOW);
     digitalWrite(pin2, HIGH);
     count += 1;
@@ -102,7 +107,7 @@ void Controller_Retract(void *context)
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
-        speedDelays[currSpeed] + 50,
+        speedDelays[currSpeed],
         NULL,
         Controller_HoldAtEnd
     );
