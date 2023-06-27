@@ -17,8 +17,10 @@ After multiple modifications due to customer expectations, this was our initial 
 
 After multiple iteration of the tests and the testing process itself, this was our final setup. We were able to test multiple units with the help of multiple microcontrollers with minimal modifications to the code. This was our final testing unit:
 
-![MicrosoftTeams-image](https://github.com/kaushikcodes/TestAutomator/assets/66272646/9a94d2f5-bb8f-4fd8-8d1f-dde0a6ea3cda)
+![MicrosoftTeams-image (1)](https://github.com/kaushikcodes/TestAutomator/assets/66272646/72dedd6e-671f-4de3-98a6-8744ca07d871)
+
 
 This was our final testing setup:
+
 
 ![MicrosoftTeams-image (3)](https://github.com/kaushikcodes/TestAutomator/assets/66272646/ad1472ed-a392-4344-bb4b-137b1d8aef78)
