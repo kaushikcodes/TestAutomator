@@ -14,3 +14,11 @@ on the other end which pushes and pulls the lever of the mixer as it extends and
 After multiple modifications due to customer expectations, this was our initial testing setup: 
 
 ![MixerTest](https://github.com/kaushikcodes/TestAutomator/assets/66272646/93b68d08-07d1-4393-842e-dbafe13dca50)
+
+After multiple iteration of the tests and the testing process itself, this was our final setup. We were able to test multiple units with the help of multiple microcontrollers with minimal modifications to the code. This was our final testing unit:
+
+![MicrosoftTeams-image](https://github.com/kaushikcodes/TestAutomator/assets/66272646/9a94d2f5-bb8f-4fd8-8d1f-dde0a6ea3cda)
+
+This was our final testing setup:
+
+![MicrosoftTeams-image (3)](https://github.com/kaushikcodes/TestAutomator/assets/66272646/ad1472ed-a392-4344-bb4b-137b1d8aef78)
