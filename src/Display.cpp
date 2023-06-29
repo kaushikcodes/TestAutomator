@@ -13,6 +13,7 @@ int speedy = Controller_GetTime();
 int setting = Controller_GetSetting();
 int counter = Controller_GetCount();
 bool power = Buttons_GetPower();
+int cycles = Controller_GetThreshold();
 
 void Display_Init(void)
 {
@@ -48,6 +49,17 @@ void Display_Init(void)
    display.setCursor(5, 220); //was 220
    display.setTextSize(1.8);
    display.printf("Power");
+
+   display.setCursor(80, 150); //was 220
+   display.setTextSize(1.8);
+   display.printf("Cycles");
+
+   display.setCursor(90, 120); //was 195
+   display.setTextSize(2);
+   display.drawRect(70, 115, 53, 23, ST77XX_BLUE);
+   display.fillRect(70, 115, 53, 23, ST77XX_BLUE);
+   display.setCursor(77, 120);
+   display.print(cycles);
 
    display.setCursor(10, 195); //was 195
    display.setTextSize(2);
@@ -117,11 +129,13 @@ void Display_Run(void)
       {
          display.printf("ON");
       }
-      else{
+      else
+      {
          display.printf("OFF");
       }
       display.print(" ");
    }
 
 }
+
 
