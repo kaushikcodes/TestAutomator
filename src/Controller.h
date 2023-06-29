@@ -27,4 +27,4 @@ void Controller_Reset();
 void Controller_PushToZero();
 bool Controller_CanHear();
 void Controller_EmergencyStop();
-
+int Controller_GetThreshold();
