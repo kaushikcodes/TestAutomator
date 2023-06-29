@@ -121,7 +121,7 @@ void Controller_Retract(void *context)
         tiny_timer_start(
             instance._private.timerGroup,
             &instance._private.controllerTimer,
-            speedDelays[currSpeed],
+            speedDelays[currSpeed] * 1.01,
             NULL,
             Controller_HoldAtEnd
         );
