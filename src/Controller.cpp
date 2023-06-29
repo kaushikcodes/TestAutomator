@@ -6,20 +6,25 @@
 //Hence, 15s to extend
 const int pin1 = 18;
 const int pin2 = 17;
-
 uint16_t count = 0;
-//int threshold = 300000; //CHANGE THIS VALUE TO CHANGE DEFAULT NUMBER OF CYCLES
-
+uint16_t threshold = 2300;
 Controller_t instance;
 uint8_t currSpeed;
 uint8_t currState;
 bool canHear = false;
 
-uint16_t speedDelays[] = {3500, 5500, 12000}; //Change these values for each speed and see which one fits best
+uint16_t speedDelaysRetract[] = {3500, 5600, 13000}; //Change these values for each speed and see which one fits best
 enum {
-    speed_2,
-    speed_4,
-    speed_10
+    speed_2_r,
+    speed_4_r,
+    speed_10_r
+};
+
+uint16_t speedDelaysExtend[] = {3650, 5750, 13400}; //Change these values for each speed and see which one fits best
+enum {
+    speed_2_e,
+    speed_4_e,
+    speed_10_e
 };
 
 //ON
@@ -39,7 +44,7 @@ enum {
     time_10_holdzero
 };
 
-// ALWAYS KEEP POWER PLUGGED IN AT THE START
+// UNPLUG POWER WHEN NOT AT 0 AND PLUG IT BACK IN
 
 void Controller_Init(tiny_timer_group_t *timerGroup)
 {
@@ -50,16 +55,16 @@ void Controller_Init(tiny_timer_group_t *timerGroup)
 
     pinMode(pin1, OUTPUT);
     pinMode(pin2, OUTPUT);
-//EXTENDS ALL THE WAY IN THE START
+//RETRACTS ALL THE WAY IN THE START AND EXTENDS BACK TO 0 SO THAT WE HAVE A ZERO POINT
     digitalWrite(pin1, HIGH);
     digitalWrite(pin2, LOW);
-    delay(13500);
+    delay(13700);
     digitalWrite(pin1, LOW);
     digitalWrite(pin2, HIGH);
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
-        8600,
+        9800,
         NULL,
         Controller_Extend
     );
@@ -70,7 +75,7 @@ void Controller_Extend(void *context)
 {
     Serial.print("Trying to extend");
     canHear = false;
-    if(count == 0)
+    if(count == 0) //FOR FIRST CYCLE WE ALREADY EXTEND ALL THE WAY
     {
         count += 1;
         Controller_Hold;
@@ -83,7 +88,7 @@ void Controller_Extend(void *context)
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
-        speedDelays[currSpeed],
+        speedDelaysExtend[currSpeed],
         NULL,
         Controller_Hold
     );
@@ -111,6 +116,10 @@ void Controller_Hold(void *context)
 void Controller_Retract(void *context)
 {
     Serial.print("Trying to retract");
+    if(count > threshold)
+    {
+        delay(10000000);
+    }
     if(Buttons_GetPower())
     {
         canHear = false;
@@ -121,7 +130,7 @@ void Controller_Retract(void *context)
         tiny_timer_start(
             instance._private.timerGroup,
             &instance._private.controllerTimer,
-            speedDelays[currSpeed] * 1.01,
+            speedDelaysRetract[currSpeed],
             NULL,
             Controller_HoldAtEnd
         );
@@ -167,13 +176,12 @@ void Controller_IncreaseSpeed()
         currSpeed = 0;
     }
 
-
 }
 
 
 int Controller_GetTime()
 {
-    return speedDelays[currSpeed];
+    return speedDelaysExtend[currSpeed];
 }
 
 int Controller_GetSetting()
@@ -191,6 +199,11 @@ bool Controller_CanHear()
     return canHear;
 }
 
+int Controller_GetThreshold()
+{
+    return threshold;
+}
+
 void Controller_EmergencyStop()
 {
     //currState = Controller_GetSetting();
@@ -198,16 +211,16 @@ void Controller_EmergencyStop()
     {
         digitalWrite(pin1, LOW);
         digitalWrite(pin2, HIGH); //EXTEND
-        delay(speedDelays[currSpeed]);
-        digitalWrite(pin1, HIGH);
-        digitalWrite(pin2, HIGH);
+        delay(speedDelaysExtend[currSpeed]);
+        digitalWrite(pin1, LOW);
+        digitalWrite(pin2, LOW); //EXTEND
     }
     else
     {
         count = 1;
-        Controller_Extend;
+        Controller_Retract;
     }
-
+//once you use emergency stop, to restart cycles, plug out the mixer, press reset mode, and plug it back in
 
 }
 
@@ -217,10 +230,9 @@ void Controller_PushToZero()
     {
         digitalWrite(pin1, LOW);
         digitalWrite(pin2, HIGH); //EXTEND
-        delay(speedDelays[currSpeed]);
+        delay(speedDelaysExtend[currSpeed]);
         digitalWrite(pin1, HIGH);
         digitalWrite(pin2, HIGH);
     }
 
 }
-
