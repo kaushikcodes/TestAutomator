@@ -146,6 +146,7 @@ void Controller_Retract(void *context)
         Serial.print("Retracting");
 
         RetractActuator();
+        count += 1;
         tiny_timer_start(
             instance._private.timerGroup,
             &instance._private.controllerTimer,
