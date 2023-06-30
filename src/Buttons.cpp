@@ -48,8 +48,7 @@ void Buttons_Init(void)
    btnA.setClickHandler(ButtonAClicked);
    btnB.setClickHandler(ButtonBClicked);
    btnC.setClickHandler(ButtonCClicked);
-   btnC.setLongClickTime(3000);
-   btnC.setLongClickHandler(ResetMode);
+
 }
 
 bool Buttons_GetPower()
