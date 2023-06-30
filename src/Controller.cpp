@@ -1,26 +1,30 @@
 #include <Arduino.h>
 #include "Controller.h"
 #include "Parameters.h"
+#include "Buttons.h"
 //75 mm extended fully, 5mm/s.
 //Hence, 15s to extend
-const int pin1 = 34;
-const int pin2 = 33;
-
+const int pin1 = 18;
+const int pin2 = 17;
+const int switchpin = 13;
 uint16_t count = 0;
-//int threshold = 300000; //CHANGE THIS VALUE TO CHANGE DEFAULT NUMBER OF CYCLES
-
+uint16_t clickCount = 0;
+uint16_t threshold = 2300;
 Controller_t instance;
 uint8_t currSpeed;
+uint8_t currState;
+bool canHear = false;
 
-uint16_t speedDelays[] = {3500, 5500, 12650}; //Change these values for each speed and see which one fits best
+uint16_t speedDelaysRetract[] = {3600, 5600, 13000}; //Change these values for each speed and see which one fits best
 enum {
-    speed_2,
-    speed_4,
-    speed_10
+    speed_2_r,
+    speed_4_r,
+    speed_10_r
 };
 
+
 //ON
-int holdAtSpeed[] = {3000, 8000, 5000}; //change these values for the time it should hold at a particular speed for (right now in ms)
+int holdAtSpeed[] = {3000, 8000, 10000}; //change these values for the time it should hold at a particular speed for
 enum {
     time_2_holdspeed,
     time_4_holdspeed,
@@ -29,14 +33,59 @@ enum {
 
 
 //OFF
-int holdAtZero[] = {4800, 12000, 500}; //change these values for the time it should hold at a ZERO for (right now in ms)
-enum { 
+int holdAtZero[] = {4800, 12000, 5000}; //change these values for the time it should hold at a ZERO for
+enum {
     time_2_holdzero,
     time_4_holdzero,
     time_10_holdzero
 };
 
-// ALWAYS KEEP POWER PLUGGED IN AT THE START
+bool ButtonIsPressed()
+{
+    delay(80);
+    byte buttonState = digitalRead(switchpin);
+    if(buttonState == HIGH)
+    {
+        Serial.print("Button is NOT pressed");
+        return false;
+    }
+
+    Serial.print("Button IS pressed");
+    return true;
+}
+
+
+bool extending = false;
+
+void ExtendActuator(void *context)
+{
+    delay(250);
+    extending = true;
+    Serial.println("Extending actuator");
+    digitalWrite(pin1, LOW);
+    digitalWrite(pin2, HIGH);
+}
+
+void StopActuatorAtZero()
+{
+    extending = false;
+    digitalWrite(pin1, HIGH);
+    digitalWrite(pin2, HIGH);
+}
+
+void RetractActuator()
+{
+    Serial.println("Retracting");
+    digitalWrite(pin1, HIGH);
+    digitalWrite(pin2, LOW);
+}
+
+void StopActuatorAtSpeed()
+{
+    digitalWrite(pin1, HIGH);
+    digitalWrite(pin2, HIGH);
+}
+
 
 void Controller_Init(tiny_timer_group_t *timerGroup)
 {
@@ -45,138 +94,106 @@ void Controller_Init(tiny_timer_group_t *timerGroup)
         instance._private.timerGroup = timerGroup;
     }
 
+    Serial.print("Initializing");
     pinMode(pin1, OUTPUT);
     pinMode(pin2, OUTPUT);
-//EXTENDS ALL THE WAY IN THE START
-    digitalWrite(pin1, LOW);
-    digitalWrite(pin2, HIGH);
-    tiny_timer_start(
-        instance._private.timerGroup,
-        &instance._private.controllerTimer,
-        15000, //this is to fully extend the actuator at the start
-        NULL,
-        Controller_Extend
-    );
-    Serial.print("Initializing");
+    pinMode(switchpin, INPUT_PULLUP);
+
+    ExtendActuator(NULL);
+
 }
 
 
-void Controller_Extend(void *context)
+void Controller_Run(void *context)
 {
-    if(count == 0)
-    {             
-        count += 1;
-        Controller_Hold;
+
+    if(extending)
+    {
+        if(ButtonIsPressed() == true)
+        {
+            clickCount += 1;
+            if(clickCount > 1) //CHANGE THIS TO 2 IF YOU WANT BUTTON TO BE LESS SENSITIVE AND CHANGE TO 0 IF YOU WANT IT TO BE MORE SENSITIVE
+            {
+                clickCount = 0;
+                Serial.print("Stopping actuator at 0");
+                StopActuatorAtZero();
+                tiny_timer_start(
+                    instance._private.timerGroup,
+                    &instance._private.controllerTimer,
+                    holdAtZero[currSpeed],
+                    NULL,
+                    Controller_Retract
+                );
+            }
+
+        }
+
     }
-   
-    digitalWrite(pin1, LOW);
-    digitalWrite(pin2, HIGH);
-    count += 1;
-    Serial.print("Extending");
-    tiny_timer_start(
-        instance._private.timerGroup,
-        &instance._private.controllerTimer,
-        speedDelays[currSpeed],
-        NULL,
-        Controller_Hold
-    );
-    Serial.print("End of extension");
+
 }
 
-
-void Controller_Hold(void *context)
-{
-    digitalWrite(pin1, HIGH);
-    digitalWrite(pin2, HIGH);
-
-    Serial.print("Holding");
-    tiny_timer_start(
-        instance._private.timerGroup,
-        &instance._private.controllerTimer,
-        holdAtZero[currSpeed],
-        NULL,
-        Controller_Retract
-    );
-}
 
 void Controller_Retract(void *context)
 {
-    Serial.print("Retracting");
+    Serial.print("Trying to retract");
+    if(count > threshold)
+    {
+        delay(10000000);
+    }
+    if(Buttons_GetPower())
+    {
+        canHear = false;
+        Serial.print("Retracting");
 
-    digitalWrite(pin1, HIGH);
-    digitalWrite(pin2, LOW);
-    tiny_timer_start(
-        instance._private.timerGroup,
-        &instance._private.controllerTimer,
-        speedDelays[currSpeed], //this was because more force was required for retracting than extending, might not need!!!
-        NULL,
-        Controller_HoldAtEnd
-    );
+        RetractActuator();
+        tiny_timer_start(
+            instance._private.timerGroup,
+            &instance._private.controllerTimer,
+            speedDelaysRetract[currSpeed],
+            NULL,
+            Controller_HoldAtEnd
+        );
+    }
+
 
 }
 
-void Controller_Reset()
-{
-    count = 0;
-    Controller_Init(NULL);
-
-}
 
 void Controller_HoldAtEnd(void *context)
 {
-
-    digitalWrite(pin1, HIGH);
-    digitalWrite(pin2, HIGH);
+    Serial.print("Trying to hold at speed");
+    canHear = true;
+    StopActuatorAtSpeed();
     Serial.print("Holding");
     tiny_timer_start(
         instance._private.timerGroup,
         &instance._private.controllerTimer,
         holdAtSpeed[currSpeed],
         NULL,
-        Controller_Extend
+        ExtendActuator
     );
 }
 
-/*
-
-void Controller_IncreaseThreshold()
-{
-    threshold = threshold + 100;
-}
-
-void Controller_DecreaseThreshold()
-{
-    threshold = threshold - 100;
-}
-
-*/
 void Controller_IncreaseSpeed()
 {
+
+    Controller_PushToZero();
+    count = 1;
     if(currSpeed < 2)
     {
         currSpeed += 1;
     }
-    else
+    else if(currSpeed == 2)
     {
-        currSpeed = currSpeed;
+        currSpeed = 0;
     }
+
 }
 
-void Controller_DecreaseSpeed()
-{
-    if(currSpeed > 0)
-    {
-        currSpeed -= 1;
-    }
-    else
-    {
-        currSpeed = currSpeed;
-    }
-}
 
 int Controller_GetTime()
 {
-    return speedDelays[currSpeed];
+    return speedDelaysRetract[currSpeed];
 }
 
 int Controller_GetSetting()
@@ -189,18 +206,51 @@ int Controller_GetCount()
     return count;
 }
 
-int Controller_GetHoldAtSpeedTime()
+bool Controller_CanHear()
 {
-    return holdAtSpeed[currSpeed];
+    return canHear;
 }
 
-void Controller_IncreaseHoldTimeAtSpeed()
+int Controller_GetThreshold()
 {
-    holdAtSpeed[currSpeed] = holdAtSpeed[currSpeed] + 1000;
+    return threshold;
+}
+
+void Controller_EmergencyStop()
+{
+    //currState = Controller_GetSetting();
+    if(!Buttons_GetPower())
+    {
+        while(!ButtonIsPressed())
+        {
+            digitalWrite(pin1, LOW);
+            digitalWrite(pin2, HIGH); //EXTEND
+        }
+        digitalWrite(pin1, LOW);
+        digitalWrite(pin2, LOW); //EXTEND
+    }
+
+    else
+    {
+        count = 1;
+        Controller_Retract;
+    }
+//once you use emergency stop, to restart cycles, plug out the mixer, press reset mode, and plug it back in
 
 }
 
-void Controller_DecreaseHoldTimeAtSpeed()
+void Controller_PushToZero()
 {
-    holdAtSpeed[currSpeed] = holdAtSpeed[currSpeed] - 1000;
+    if(Controller_CanHear())
+    {
+        while(!ButtonIsPressed())
+        {
+            digitalWrite(pin1, LOW);
+            digitalWrite(pin2, HIGH); //EXTEND
+        }
+        digitalWrite(pin1, LOW);
+        digitalWrite(pin2, LOW); //EXTEND
+    }
+
 }
+
