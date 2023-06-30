@@ -5,8 +5,6 @@
 void Buttons_Run(void);
 void ButtonAClicked(Button2 &button);
 void ButtonBClicked(Button2 &button);
-void ButtonCClicked(Button2 &button);
-void ButtonDlicked(Button2 &button);
 void Buttons_Init(void);
-void ResetMode(Button2 &button);
+bool Buttons_GetPower();
 #endif
