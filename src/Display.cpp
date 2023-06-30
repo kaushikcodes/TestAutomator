@@ -3,35 +3,17 @@
 #include <Adafruit_LIS3DH.h>
 #include "Controller.h"
 #include "Arduino.h"
-
-ThinkInk_290_Grayscale4_T5 display(EPD_DC, EPD_RESET, EPD_CS, -1);
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7789.h>
+#include <SPI.h>
+#include "Parameters.h"
+#include "Buttons.h"
+Adafruit_ST7789 display = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 int speedy = Controller_GetTime();
 int setting = Controller_GetSetting();
 int counter = Controller_GetCount();
-int timeAtSpeed = Controller_GetHoldAtSpeedTime();
-ThinkInk_290_Grayscale4_T5* Display_GetPtr(void)
-{
-   return &display;
-}
-
-void Display_Rest(void)
-{
-   display.powerDown();
-}
-
-void Display_RefreshFromBuffer(void)
-{
-   Serial.println("Partial Refresh");
-   display.powerUp();
-   display.displayPartial(0, 0, display.width(), display.height());
-}
-
-void Display_FullRefreshFromBuffer(void)
-{
-   Serial.println("Full Refresh");
-   display.powerUp();
-   display.display();
-}
+bool power = Buttons_GetPower();
+int cycles = Controller_GetThreshold();
 
 void Display_Init(void)
 {
@@ -39,81 +21,119 @@ void Display_Init(void)
    {
       setting = 10;
    }
-   display.begin(THINKINK_MONO);
-   display.clearBuffer();
-   display.display();
-   display.setTextColor(EPD_BLACK, EPD_LIGHT);
-   display.setTextSize(3);
+   pinMode(TFT_BACKLITE, OUTPUT);
+   digitalWrite(TFT_BACKLITE, HIGH);
+
+   pinMode(TFT_I2C_POWER, OUTPUT);
+   digitalWrite(TFT_I2C_POWER, HIGH);
+
+
+   display.init(135, 240);
+   display.fillScreen(ST77XX_BLACK);
+   display.setTextColor(ST77XX_WHITE);
+
+   display.setTextSize(2.3);
+   display.setCursor(5, 5);
    display.printf("KitchenAid Mixer");
-   display.setCursor(10, 120);
+
+   display.setCursor(5, 150); //was 220
    display.setTextSize(1.8);
    display.printf("Count");
-   display.setCursor(30, 90);
+
+   display.setCursor(10, 120); //was 195
    display.setTextSize(2);
+   display.drawRect(8, 115, 46, 23, ST77XX_BLUE);
+   display.fillRect(8, 115, 46, 23, ST77XX_BLUE);
    display.print(counter);
-   display.setCursor(210, 90);
-   display.setTextSize(2);
-   display.print(setting);
-   display.setCursor(180, 120);
+
+   display.setCursor(5, 220); //was 220
    display.setTextSize(1.8);
+   display.printf("Power");
+
+   display.setCursor(80, 150); //was 220
+   display.setTextSize(1.8);
+   display.printf("Cycles");
+
+   display.setCursor(90, 120); //was 195
+   display.setTextSize(2);
+   display.drawRect(70, 115, 53, 23, ST77XX_BLUE);
+   display.fillRect(70, 115, 53, 23, ST77XX_BLUE);
+   display.setCursor(77, 120);
+   display.print(cycles);
+
+   display.setCursor(10, 195); //was 195
+   display.setTextSize(2);
+   display.drawRect(8, 190, 46, 23, ST77XX_RED);
+   display.fillRect(8, 190, 46, 23, ST77XX_RED);
+   display.printf("ON");
+
+   display.setCursor(90, 195);
+   display.setTextSize(2.3);
+   display.drawRect(73, 190, 46, 23, ST77XX_BLUE);
+   display.fillRect(73, 190, 46, 23, ST77XX_BLUE);
+   display.print(setting);
+
+
+   display.setCursor(60, 220);
+   display.setTextSize(1.9);
    display.printf("- Setting +");
-   display.display();
+
 }
 
 
 void Display_Run(void)
 {
-    int speedy2 = Controller_GetTime();
-    int count2 = Controller_GetCount();
-    //int thresholdy2 = Controller_GetThreshold();
-    int timeAtSpeedNew = Controller_GetHoldAtSpeedTime();
-    if(speedy2 != speedy)
-    {
-        speedy = speedy2;
-        setting = Controller_GetSetting();
-         if(setting == 6)
-         {
-            setting = 10;
-         }
-        display.setCursor(205, 90);
-        display.setTextSize(2);
-        display.print(setting);
-        display.print(" ");
-        display.display();
-    }
-/*
-    if(thresholdy2 != thresholdy)
-    {
-        thresholdy = thresholdy2;
-        display.setCursor(30, 90);
-        display.setTextSize(2);
-        display.print(thresholdy);
-        display.print(" ");
-        display.display();
-    }
-*/
 
-/*
-   if(timeAtSpeedNew != timeAtSpeed)
-    {
-        timeAtSpeed = timeAtSpeedNew;
-        display.setCursor(30, 90);
-        display.setTextSize(2);
-        display.print(timeAtSpeed);
-        display.print(" ");
-        display.display();
-    }
-*/
-   if(count2 != counter)
+   int speedy2 = Controller_GetTime();
+   int count2 = Controller_GetCount();
+   bool power2 = Buttons_GetPower();
+
+   if(speedy2 != speedy)
    {
-      counter = count2;
-      display.setCursor(30, 90);
+      speedy = speedy2;
+      setting = Controller_GetSetting();
+      if(setting == 6)
+      {
+         setting = 10;
+      }
+      display.drawRect(73, 190, 46, 23, ST77XX_BLUE);
+      display.fillRect(73, 190, 46, 23, ST77XX_BLUE);
+      display.setCursor(90, 195);
       display.setTextSize(2);
-      display.print(counter);
+      display.print(setting);
       display.print(" ");
-      display.display();
    }
 
 
+   if(count2 != counter)
+
+   {
+      counter = count2;
+      display.drawRect(8, 115, 46, 23, ST77XX_BLUE);
+      display.fillRect(8, 115, 46, 23, ST77XX_BLUE);
+      display.setCursor(10, 120);
+      display.setTextSize(2);
+      display.print(counter);
+      display.print(" ");
+
+   }
+
+   if(power != power2)
+   {
+      power = power2;
+      display.drawRect(8, 190, 46, 23, ST77XX_RED);
+      display.fillRect(8, 190, 46, 23, ST77XX_RED);
+      display.setCursor(10, 195);
+      display.setTextSize(2);
+      if(power)
+      {
+         display.printf("ON");
+      }
+      else
+      {
+         display.printf("OFF");
+      }
+      display.print(" ");
+   }
 
 }
